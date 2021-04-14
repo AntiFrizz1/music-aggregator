@@ -6,21 +6,6 @@ import mongoengine as me
 import datetime
 
 
-def to_json_method(self):
-    this_dict = {}
-    for k, v in self.__dict__.items():
-        if k[-4:] == '_rel':
-            continue
-        this_dict[k] = v
-
-    exclude = self.exclude
-    if exclude:
-        for key in exclude:
-            this_dict.pop(key)
-
-    return this_dict
-
-
 class User(sql_db.Model, UserMixin):
     __tablename__ = "user"
 
@@ -34,8 +19,6 @@ class User(sql_db.Model, UserMixin):
 
     def verify_password(self, password):
         return check_password_hash(self.password, password)
-
-    to_json_ = to_json_method
 
 
 class Track(me.EmbeddedDocument):
