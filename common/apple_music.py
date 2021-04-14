@@ -1,6 +1,6 @@
-from common.music_service import MusicService
-import requests
 import re
+import requests
+from common.music_service import MusicService
 
 
 class AppleMusic(MusicService):
@@ -8,8 +8,6 @@ class AppleMusic(MusicService):
 
     # https://music.apple.com/ru/album/more-feat-lexie-liu-jaira-burns-seraphine-league-of-legends/1535612019?i=1535612021
     # https://music.apple.com/ru/album/fxxker/1203189772?i=1203189778
-    # regex:
-    # ((http|https)://)?(www\.)?music\.apple\.com/\w{2}/album/[^/]+/([0-9]+)\?i=([0-9]+)
     url_regex = re.compile(r'((http|https)://)?(www\.)?music\.apple\.com/\w{2}/album/[^/]+/([0-9]+)\?i=([0-9]+)')
 
     def __init__(self):
@@ -78,10 +76,3 @@ class AppleMusic(MusicService):
 
     def search_track_by_query(self, query):
         raise NotImplemented()
-
-
-if __name__ == '__main__':
-    url = 'https://music.apple.com/ru/album/pop-stars-feat-jaira-burns/1439420228?i=1439420504'
-    am = AppleMusic()
-    track, artists, album, _ = am.search_track_by_link(url)
-    print(am.search_track(track, artists, album))
