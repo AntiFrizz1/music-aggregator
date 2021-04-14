@@ -1,15 +1,16 @@
+import yaml
 import json
 
-import yaml
 from flask import Flask, url_for, jsonify, request
 from flask_httpauth import HTTPBasicAuth, g
-from mongoengine import ValidationError
+from mongoengine import ValidationError, DoesNotExist
 
 from common.spotify import Spotify
 from common.ya_music import YandexMusic
 from db.models import User, Playlist, History
-from db.mongo import initialize_mongo_db
 from db.sql import sql_db, initialize_sql_db
+from db.mongo import initialize_mongo_db
+from schemas.schemas import initialize_marshmallow, playlist_schema, playlists_schema
 
 auth = HTTPBasicAuth()
 app = Flask(__name__)
@@ -50,33 +51,17 @@ def signup():
     return jsonify({'username': username, 'email': email}), 201
 
 
-def encode_playlist_json(playlist_json):
-    output_json = playlist_json.copy()
+def add_user_id(object_json):
+    output_json = object_json.copy()
     output_json['user_id'] = g.user.user_id
     return output_json
-
-
-def decode_playlist_json(playlist_json):
-    playlist_json.pop('user_id')
-    playlist_json.pop('_id')
-    return playlist_json
-
-
-def decode_playlist_list(playlist_list):
-    for playlist_json in playlist_list:
-        playlist_json.pop('user_id')
-        playlist_json.pop('tracks')
-        id = playlist_json['_id']['$oid']
-        playlist_json.pop('_id')
-        playlist_json['_link'] = {'self': url_for('process_playlist', playlist_id=id)}
-    return playlist_list
 
 
 @app.route('/playlists/', methods=['POST', 'GET'])
 @auth.login_required
 def process_playlists():
     if request.method == 'POST':
-        request_json = encode_playlist_json(request.json)
+        request_json = add_user_id(request.json)
         playlist = Playlist.from_json(json.dumps(request_json))
         try:
             playlist.validate()
@@ -85,26 +70,33 @@ def process_playlists():
         except ValidationError:
             return jsonify({"error": "Bad request."}), 400
     else:
-        playlist_list = json.loads(Playlist.objects(user_id=g.user.user_id).to_json())
-        playlist_list = decode_playlist_list(playlist_list)
-        return jsonify(playlist_list), 200
+        playlists_json = playlists_schema.dump(Playlist.objects(user_id=g.user.user_id), many=True)
+        return jsonify(playlists_json), 200
 
 
 @app.route("/playlists/<string:playlist_id>", methods=['PUT', 'GET', 'PATCH', 'DELETE'])
 @auth.login_required
 def process_playlist(playlist_id):
-    playlist = Playlist.objects.get(id=playlist_id) # exception
-    if (not playlist) and (playlist.user_id != g.user.user_id):
+    try:
+        playlist = Playlist.objects(id=playlist_id).get()
+    except DoesNotExist:
+        playlist = None
+    except ValidationError:
+        return jsonify({'error': 'Internal server error.'}), 500
+
+    if (not playlist) or (playlist.user_id != g.user.user_id):
         return jsonify({'error': 'Playlist "%s" not found.' % playlist_id}), 404
 
     if request.method == 'PUT':
-        playlist = Playlist.from_json(encode_playlist_json(request.json))
+        playlist_json = add_user_id(request.json)
+        if len(playlist_schema.validate(playlist_json)) != 0:
+            return jsonify({'error': 'Bad request.'}), 400
+        playlist = playlist_schema.load(playlist_json)
         playlist.save()
         return jsonify(request.json), 200, {'Location': url_for('process_playlist', playlist_id=str(playlist.id))}
 
     if request.method == 'GET':
-        playlist_json = decode_playlist_json(json.loads(playlist.to_json()))
-        return jsonify(playlist_json), 201
+        return playlist_schema.dump(playlist), 201
 
     if request.method == 'DELETE':
         playlist.delete()
@@ -155,7 +147,6 @@ def search():
         history_json['limit'] = limit
     history = History.from_json(json.dumps(history_json))
     history.save()
-    print(history.to_json())
     return jsonify(result), 200
 
 
@@ -168,10 +159,11 @@ if __name__ == '__main__':
     app.app_context().push()
     initialize_sql_db(app)
     initialize_mongo_db(app)
+    initialize_marshmallow(app)
 
     config_filepath = "config.yaml"
     services.append(YandexMusic())
-    #services.append(AppleMusic())
+    # services.append(AppleMusic())
     with open(config_filepath, "r") as f:
         try:
             config = yaml.safe_load(f)

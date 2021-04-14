@@ -38,31 +38,17 @@ class User(sql_db.Model, UserMixin):
     to_json_ = to_json_method
 
 
-class PlaylistTrack(mongo.Document):
-    track_url = me.StringField(required=True)
-    service_name = me.StringField(required=True)
-    # add more information about track
-
-
-class Playlist(mongo.Document):
-    exclude = ()
-
-    user_id = me.IntField(required=True)
-    name = me.StringField(required=True)
-    description = me.StringField(required=True)
-    tracks = me.ListField(me.ReferenceField(PlaylistTrack), required=True)
-
-
-class Track(mongo.Document):
+class Track(me.EmbeddedDocument):
+    meta = {'allow_inheritance': True}
     album = me.StringField()
     artists = me.ListField(me.StringField(), required=True)
     track = me.StringField(required=True)
     url = me.StringField(required=True)
 
 
-class QueryResult(mongo.Document):
+class QueryResult(me.EmbeddedDocument):
     service_name = me.StringField(required=True)
-    tracks = me.ListField(me.ReferenceField(Track), required=True)
+    tracks = me.EmbeddedDocumentListField(Track, required=True)
 
 
 class History(mongo.Document):
@@ -70,5 +56,16 @@ class History(mongo.Document):
     services = me.StringField()
     limit = me.IntField()
     user_id = me.IntField(required=True)
-    result = me.ListField(me.ReferenceField(QueryResult), required=True)
+    result = me.EmbeddedDocumentListField(QueryResult, required=True)
     requested_at = me.DateTimeField(required=True, default=datetime.datetime.utcnow)
+
+
+class PlaylistTrack(Track):
+    service_name = me.StringField(required=True)
+
+
+class Playlist(mongo.Document):
+    user_id = me.IntField(required=True)
+    name = me.StringField(required=True)
+    description = me.StringField(required=True)
+    tracks = me.EmbeddedDocumentListField(PlaylistTrack, required=True)
