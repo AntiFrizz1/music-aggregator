@@ -24,10 +24,9 @@ class MusicAggregatorApiTestCase(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
 
-        self.sql_db_filename = str(uuid.uuid4()) + ".sqlite"
         self.mongo_db_filename = str(uuid.uuid4())
 
-        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///" + self.sql_db_filename
+        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite://"
         app.config['TESTING'] = True
 
         app.sql_db = SQLAlchemy()
