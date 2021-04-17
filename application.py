@@ -1,19 +1,21 @@
-from flask import Flask, redirect, url_for, abort, jsonify, request
-from db.models import User, Playlist, History
-from db.sql import sql_db, initialize_sql_db
-from db.mongo import mongo, initialize_mongo_db
-from flask_httpauth import HTTPBasicAuth, g
-from mongoengine import ValidationError
-from common.spotify import Spotify
-from common.ya_music import YandexMusic
-import yaml
 import json
 
+import yaml
+from flask import Flask, url_for, jsonify, request
+from flask_httpauth import HTTPBasicAuth, g
+from mongoengine import ValidationError
+
+from common.spotify import Spotify
+from common.ya_music import YandexMusic
+from db.models import User, Playlist, History
+from db.mongo import initialize_mongo_db
+from db.sql import sql_db, initialize_sql_db
 
 auth = HTTPBasicAuth()
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///example.sqlite"
 app.config['MONGODB_SETTINGS'] = {"db": "myapp"}
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 services = []
 
@@ -155,6 +157,11 @@ def search():
     history.save()
     print(history.to_json())
     return jsonify(result), 200
+
+
+@app.route('/')
+def check_if_alive():
+    return 'Hey, Im alive!'
 
 
 if __name__ == '__main__':
