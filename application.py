@@ -1,15 +1,19 @@
-import json
-
 import yaml
-from flask import Flask, url_for, jsonify, request
+import json
+import functools
+
+from flask import Flask, url_for, jsonify, request, abort
 from flask_httpauth import HTTPBasicAuth, g
-from mongoengine import ValidationError
+from mongoengine import ValidationError, DoesNotExist
+from webargs import fields, validate, flaskparser
+from webargs.flaskparser import use_args
 
 from common.spotify import Spotify
 from common.ya_music import YandexMusic
 from db.models import User, Playlist, History
-from db.mongo import initialize_mongo_db
 from db.sql import sql_db, initialize_sql_db
+from db.mongo import initialize_mongo_db
+from schemas.schemas import initialize_marshmallow, playlist_schema, playlists_schema, user_schema
 
 auth = HTTPBasicAuth()
 app = Flask(__name__)
@@ -17,7 +21,33 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///example.sqlite"
 app.config['MONGODB_SETTINGS'] = {"db": "myapp"}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-services = []
+services = {}
+
+
+@flaskparser.parser.error_handler
+def arg_parser_error_handle(error, req, schema, *, error_status_code, error_headers):
+    status_code = error_status_code or 400
+    abort(status_code)
+
+
+@app.errorhandler(400)
+def bad_request(error):
+    return jsonify({"error": 'Bad request.'}), 400
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return jsonify({"error": error.description}), 404
+
+
+@app.errorhandler(501)
+def not_implemented(error):
+    return jsonify({"error": 'Not implemented.'}), 501
+
+
+@app.errorhandler(500)
+def server_internal_error(error):
+    return jsonify({"error": 'Server internal error.'}), 500
 
 
 @auth.verify_password
@@ -29,120 +59,113 @@ def verify_password(username, password):
     return True
 
 
-@app.route('/signup/', methods=['POST'])
-def signup():
-    username = request.json.get('username')
-    password = request.json.get('password')
-    email = request.json.get('email')
-
-    if not (username and email and password):
-        return jsonify({"error": 'Bad request.'}), 400
-
-    user = sql_db.session.query(User).filter(User.username == username).first()
+@app.route('/signup', methods=['POST'])
+@use_args(user_schema, location='json')
+def signup(received_user):
+    user = sql_db.session.query(User).filter(User.username == received_user.username).first()
     if user:
-        return jsonify({"error": 'User "%s" already exist.' % username}), 400
+        return jsonify({"error": 'User "%s" already exist.' % received_user.username}), 400
 
-    user = User(username=username, email=email)
-    user.set_password(password)
+    user = received_user
     sql_db.session.add(user)
     sql_db.session.commit()
 
-    return jsonify({'username': username, 'email': email}), 201
+    return jsonify(user_schema.dump(user)), 200
 
 
-def encode_playlist_json(playlist_json):
-    output_json = playlist_json.copy()
-    output_json['user_id'] = g.user.user_id
-    return output_json
-
-
-def decode_playlist_json(playlist_json):
-    playlist_json.pop('user_id')
-    playlist_json.pop('_id')
-    return playlist_json
-
-
-def decode_playlist_list(playlist_list):
-    for playlist_json in playlist_list:
-        playlist_json.pop('user_id')
-        playlist_json.pop('tracks')
-        id = playlist_json['_id']['$oid']
-        playlist_json.pop('_id')
-        playlist_json['_link'] = {'self': url_for('process_playlist', playlist_id=id)}
-    return playlist_list
-
-
-@app.route('/playlists/', methods=['POST', 'GET'])
+@app.route('/playlists/', methods=['POST'])
 @auth.login_required
-def process_playlists():
-    if request.method == 'POST':
-        request_json = encode_playlist_json(request.json)
-        playlist = Playlist.from_json(json.dumps(request_json))
+@use_args(playlist_schema, location='json')
+def add_playlist(playlist):
+    playlist.save()
+    return jsonify(request.json), 201, {'Location': url_for('get_playlist', playlist_id=str(playlist.id))}
+
+
+@app.route('/playlists/', methods=['GET'])
+@auth.login_required
+def get_playlists():
+    playlists_json = playlists_schema.dump(Playlist.objects(user_id=g.user.user_id), many=True)
+    return jsonify(playlists_json), 200
+
+
+def retrieve_playlist_from_db(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        playlist = None
+        playlist_id = kwargs['playlist_id']
         try:
-            playlist.validate()
-            playlist.save()
-            return jsonify(request.json), 201, {'Location': url_for('process_playlist', playlist_id=str(playlist.id))}
+            playlist = Playlist.objects(id=playlist_id).get()
+        except DoesNotExist:
+            pass
         except ValidationError:
-            return jsonify({"error": "Bad request."}), 400
-    else:
-        playlist_list = json.loads(Playlist.objects(user_id=g.user.user_id).to_json())
-        playlist_list = decode_playlist_list(playlist_list)
-        return jsonify(playlist_list), 200
+            abort(500)
+
+        if (not playlist) or (playlist.user_id != g.user.user_id):
+            abort(404, 'Playlist "%s" not found.' % playlist_id)
+        kwargs.update({"db_playlist": playlist})
+        return func(*args, **kwargs)
+
+    wrapper.__wrapped__ = func
+    return wrapper
 
 
-@app.route("/playlists/<string:playlist_id>", methods=['PUT', 'GET', 'PATCH', 'DELETE'])
+@app.route("/playlists/<string:playlist_id>", methods=['PUT'])
 @auth.login_required
-def process_playlist(playlist_id):
-    playlist = Playlist.objects.get(id=playlist_id) # exception
-    if (not playlist) and (playlist.user_id != g.user.user_id):
-        return jsonify({'error': 'Playlist "%s" not found.' % playlist_id}), 404
+@use_args(playlist_schema, location='json')
+@retrieve_playlist_from_db
+def update_playlist(received_playlist, playlist_id, db_playlist):
+    received_playlist.id = db_playlist.id
+    received_playlist.save()
+    return jsonify(playlist_schema.dump(received_playlist)), 200, {'Location': url_for('get_playlist', playlist_id=playlist_id)}
 
-    if request.method == 'PUT':
-        playlist = Playlist.from_json(encode_playlist_json(request.json))
-        playlist.save()
-        return jsonify(request.json), 200, {'Location': url_for('process_playlist', playlist_id=str(playlist.id))}
 
-    if request.method == 'GET':
-        playlist_json = decode_playlist_json(json.loads(playlist.to_json()))
-        return jsonify(playlist_json), 201
+@app.route("/playlists/<string:playlist_id>", methods=['GET'])
+@auth.login_required
+@retrieve_playlist_from_db
+def get_playlist(playlist_id, db_playlist):
+    return playlist_schema.dump(db_playlist), 200
 
-    if request.method == 'DELETE':
-        playlist.delete()
-        return jsonify(), 204
 
-    return jsonify(), 501
+@app.route("/playlists/<string:playlist_id>", methods=['DELETE'])
+@auth.login_required
+@retrieve_playlist_from_db
+def delete_playlist(playlist_id, db_playlist):
+    db_playlist.delete()
+    return jsonify(), 204
+
+
+search_args = {
+    "q": fields.Str(required=True, validate=validate.Length(min=3)),
+    "limit": fields.Int(validate=lambda val: val > 0),
+    "services": fields.DelimitedList(fields.Str(), validate=validate.Length(min=1))
+}
 
 
 @app.route("/search", methods=['GET'])
 @auth.login_required
-def search():
-    query = request.args.get('q')
-    service_names = request.args.get('services')
-    limit = request.args.get('limit')
-    search_in_services = []
-    if not query:
-        return jsonify({'error': "Expected path variable q."}), 400
+@use_args(search_args, location="query")
+def search(args):
+    query = args['q']
+    service_names = args.get('services')
+    limit = args.get('limit')
+
+    search_in_services = {}
     if not service_names:
         search_in_services = services
     else:
-        service_names_list = service_names.split(' ')
-        for service_name in service_names_list:
-            find_service = False
-            for service in services:
-                if service_name == service.name:
-                    search_in_services.append(service)
-                    find_service = True
-                    break
-            if not find_service:
-                return jsonify({'error': "Unknown service name %s" % service_name}), 400
+        for service_name in service_names:
+            if services.get(service_name):
+                search_in_services[service_name] = services[service_name]
+            else:
+                abort(400)
     try:
         if limit:
             limit = int(limit)
-    except:
-        return jsonify({'error': "Incorrect limit value %s" % limit}), 400
+    except ValueError:
+        abort(400)
 
     result = []
-    for service in search_in_services:
+    for service in search_in_services.values():
         result.append(service.search_track_by_query(query, limit))
     history_json = {
         'query': query,
@@ -150,12 +173,11 @@ def search():
         'user_id': g.user.user_id
     }
     if service_names:
-        history_json['services'] = service_names
+        history_json['services'] = ",".join(service_names)
     if limit:
         history_json['limit'] = limit
     history = History.from_json(json.dumps(history_json))
     history.save()
-    print(history.to_json())
     return jsonify(result), 200
 
 
@@ -168,14 +190,14 @@ if __name__ == '__main__':
     app.app_context().push()
     initialize_sql_db(app)
     initialize_mongo_db(app)
+    initialize_marshmallow(app)
 
     config_filepath = "config.yaml"
-    services.append(YandexMusic())
-    #services.append(AppleMusic())
+    services[YandexMusic.name] = YandexMusic()
     with open(config_filepath, "r") as f:
         try:
             config = yaml.safe_load(f)
-            services.append(Spotify(config['spotify']))
+            services[Spotify.name] = Spotify(config['spotify'])
         except yaml.YAMLError as exc:
             print(exc)
 
