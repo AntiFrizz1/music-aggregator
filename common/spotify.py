@@ -43,11 +43,11 @@ class Spotify(MusicService):
             track = track_info['name']
             artists = [artist['name'] for artist in track_info['artists']]
             album = track_info['album']['name']
-            return track, artists, album, 'track' + track_info['id']
+            return track, artists, album, self._get_entity_id(track_info['id'], self.Entity.Track)
         except SpotifyException:
             return None
 
-    def search_track(self, track, artists=None, album=None):
+    def search_track(self, track, artists, album=None):
         query = ', '.join(artists) + " - " + track
         results = self.client.search(q=query, type='track', market='RU')
         tracks_items = results['tracks']['items']
@@ -78,7 +78,7 @@ class Spotify(MusicService):
         try:
             artist_info = self.client.artist(link)
             artist = artist_info['name']
-            return artist, 'artist' + artist_info['id']
+            return artist, self._get_entity_id(artist_info['id'], self.Entity.Artist)
         except SpotifyException:
             return None
 
@@ -86,7 +86,7 @@ class Spotify(MusicService):
         try:
             album_info = self.client.album(link)
             album = album_info['name']
-            return album, 'album' + album_info['id']
+            return album, self._get_entity_id(album_info['id'], self.Entity.Album)
         except SpotifyException:
             return None
 
@@ -106,12 +106,12 @@ class Spotify(MusicService):
                     return results['albums']['items'][0]['external_urls']['spotify']
         return None
 
-    def search_by_link(self, link):
+    def detect_entity_by_link(self, link):
         if link.find("track") != -1:
-            return self.search_track_by_link(link)
-        elif link.find("artist") != -1:
-            return self.search_artist_by_link(link)
-        elif link.find("album") != -1:
-            return self.search_album_by_link(link)
+            return self.Entity.Track
+        elif link.find('album') != -1:
+            return self.Entity.Album
+        elif link.find('artist') != -1:
+            return self.Entity.Artist
         else:
             return None
