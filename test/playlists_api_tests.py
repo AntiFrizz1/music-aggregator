@@ -86,7 +86,7 @@ class MusicAggregatorApiTestCase(unittest.TestCase):
     def test_get_empty_playlists(self):
         response = self.app.get('playlists/', headers={"Authorization": "Basic {}".format(self.user_credentials)})
         assert response.status_code == 200
-        assert response.json.empty()
+        assert len(response.json) == 0
 
     def _provision_playlist(self):
         response = self.app.post('playlists/',

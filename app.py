@@ -21,10 +21,9 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite://")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MONGODB_SETTINGS'] = {
-    "db": "music_aggregator",
-    'host': 'mongodb://root:rootpassword@localhost:27017/music_aggregator'
+    "host": 'mongodb://' + os.getenv('MONGODB_USERNAME', 'user') + ':' + os.getenv('MONGODB_PASSWORD', 'password') + '@'
+            + os.getenv('MONGODB_HOSTNAME', 'localhost') + ':27017/' + os.getenv('MONGODB_DATABASE', 'my_db')
 }
-
 services = {}
 
 
@@ -208,6 +207,10 @@ def init_app():
     sql_db.create_all()
 
 
-if __name__ == '__main__':
+def run():
     init_app()
-    # app.run(debug=True)
+    return app
+
+
+if __name__ == '__main__':
+    run()
