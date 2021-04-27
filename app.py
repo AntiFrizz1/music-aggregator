@@ -1,6 +1,7 @@
 import yaml
 import json
 import functools
+import os
 
 from flask import Flask, url_for, jsonify, request, abort
 from flask_httpauth import HTTPBasicAuth, g
@@ -17,9 +18,12 @@ from schemas.schemas import initialize_marshmallow, playlist_schema, playlists_s
 
 auth = HTTPBasicAuth()
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///example.sqlite"
-app.config['MONGODB_SETTINGS'] = {"db": "myapp"}
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite://")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MONGODB_SETTINGS'] = {
+    "db": "music_aggregator",
+    'host': 'mongodb://root:rootpassword@localhost:27017/music_aggregator'
+}
 
 services = {}
 
@@ -186,7 +190,7 @@ def check_if_alive():
     return 'Hey, Im alive!'
 
 
-if __name__ == '__main__':
+def init_app():
     app.app_context().push()
     initialize_sql_db(app)
     initialize_mongo_db(app)
@@ -202,4 +206,8 @@ if __name__ == '__main__':
             print(exc)
 
     sql_db.create_all()
-    app.run(debug=True)
+
+
+if __name__ == '__main__':
+    init_app()
+    # app.run(debug=True)

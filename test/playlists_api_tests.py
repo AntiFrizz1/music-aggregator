@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import mongoengine
 from flask_sqlalchemy import SQLAlchemy
 
-from application import *
+from app import *
 
 test_username = 'PeterTheGreat'
 test_password = 'GreatToBe'
