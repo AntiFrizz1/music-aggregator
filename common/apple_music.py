@@ -162,3 +162,114 @@ class AppleMusic(MusicService):
             return self.Entity.Album
         else:
             return None
+
+    def search_track_by_query(self, query, limit=None):
+        if not limit:
+            limit = self.default_limit
+        url = 'https://itunes.apple.com/search'
+        rsp = requests.get(url, params={
+            'term': query,
+            'entity': 'song',
+            'country': 'RU'
+        })
+        if rsp.status_code != 200:
+            return None
+        rsp_json = rsp.json()
+        if rsp_json['resultCount'] == 0:
+            return None
+        tracks = rsp_json['results'][:limit]
+        track_list = []
+        for track in tracks:
+            track_list.append({
+                'track': track['trackName'],
+                'album': track['collectionName'],
+                'artists': [track['artistName']],
+                'url': track['trackViewUrl']
+            })
+        response = {
+            'service_name': self.name,
+            'tracks': track_list
+        }
+        return response
+
+    @staticmethod
+    def _entity_type_to_string(entity: MusicService.Entity):
+        if entity == MusicService.Entity.Album:
+            return "album"
+        elif entity == MusicService.Entity.Track:
+            return "song"
+        elif entity == MusicService.Entity.Artist:
+            return "musicArtist"
+        else:
+            return None
+
+    @staticmethod
+    def _extract_track_data(track_json):
+        return {
+            'track': track_json['trackName'],
+            'album': track_json['collectionName'],
+            'artists': [track_json['artistName']],
+            'url': track_json['trackViewUrl']
+        }
+
+    @staticmethod
+    def _extract_album_data(album_json):
+        return {
+            'album': album_json['collectionName'],
+            'artists': [album_json['artistName']],
+            'url': album_json['collectionViewUrl']
+        }
+
+    @staticmethod
+    def _extract_artist_data(artist_json):
+        return {
+            'artist': artist_json['artistName'],
+            'url': artist_json['artistLinkUrl']
+        }
+
+    @staticmethod
+    def _extract_search_data(data_json, entity):
+        if entity == MusicService.Entity.Album:
+            return AppleMusic._extract_album_data(data_json)
+        elif entity == MusicService.Entity.Track:
+            return AppleMusic._extract_track_data(data_json)
+        elif entity == MusicService.Entity.Artist:
+            return AppleMusic._extract_artist_data(data_json)
+        else:
+            return None
+
+    def search_by_query(self, query, entity: MusicService.Entity, limit=MusicService.default_limit):
+        entity_str = self._entity_type_to_string(entity)
+        if not entity_str:
+            return None
+        url = 'https://itunes.apple.com/search'
+        rsp = requests.get(url, params={
+            'term': query,
+            'entity': entity_str,
+            'country': 'RU',
+            'limit': limit
+        })
+        if rsp.status_code != 200:
+            return None
+        rsp_json = rsp.json()
+        if rsp_json['resultCount'] == 0:
+            return None
+        results = rsp_json['results'][:limit]
+        entity_list = []
+        for result in results:
+            entity_list.append(self._extract_search_data(result, entity))
+        entity_plural_name = MusicService._entity_to_plural_str(entity)
+        if not entity_plural_name:
+            return None
+        response = {
+            'service_name': self.name,
+            entity_plural_name: entity_list
+        }
+        return response
+
+
+if __name__ == '__main__':
+    am = AppleMusic()
+    print(am.search_by_query("lil", MusicService.Entity.Artist))
+    print(am.search_by_query("love", MusicService.Entity.Album))
+    print(am.search_by_query("lil", MusicService.Entity.Track))

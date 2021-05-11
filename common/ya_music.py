@@ -144,10 +144,77 @@ class YandexMusic(MusicService):
         else:
             return None
 
+    @staticmethod
+    def _entity_type_to_string(entity: MusicService.Entity):
+        if entity == MusicService.Entity.Album:
+            return "album"
+        elif entity == MusicService.Entity.Track:
+            return "track"
+        elif entity == MusicService.Entity.Artist:
+            return "artist"
+        else:
+            return None
+
+    @staticmethod
+    def _extract_track_data(track_json):
+        album = track_json.albums[0].title if track_json.albums and len(track_json.albums) > 0 else track_json.title
+        return {
+            'track': track_json.title,
+            'album': album,
+            'artists': [artist.name for artist in track_json.artists],
+            'url': "https://music.yandex.ru/track/%s" % track_json.track_id
+        }
+
+    @staticmethod
+    def _extract_album_data(album_json):
+        return {
+            'album': album_json.title,
+            'artists': [artist.name for artist in album_json.artists],
+            'url': "https://music.yandex.ru/album/%s" % album_json.id
+        }
+
+    @staticmethod
+    def _extract_artist_data(artist_json):
+        return {
+            'artist': artist_json.name,
+            'url': "https://music.yandex.ru/artist/%s" % artist_json.id
+        }
+
+    @staticmethod
+    def _extract_search_data(data_json, entity):
+        if entity == MusicService.Entity.Album:
+            return YandexMusic._extract_album_data(data_json)
+        elif entity == MusicService.Entity.Track:
+            return YandexMusic._extract_track_data(data_json)
+        elif entity == MusicService.Entity.Artist:
+            return YandexMusic._extract_artist_data(data_json)
+        else:
+            return None
+
+    def search_by_query(self, query, entity: MusicService.Entity, limit=MusicService.default_limit):
+        entity_str = self._entity_type_to_string(entity)
+        if not entity_str:
+            return None
+        plural_entity_str = entity_str + "s"
+        entity_list = []
+        count = limit
+        page = 0
+        while count > 0:
+            results = self.client.search(text=query, type_=entity_str, page=page)
+            results = results[plural_entity_str].results[:count]
+            for result in results:
+                entity_list.append(self._extract_search_data(result, entity))
+                count -= 1
+            page += 1
+        response = {
+            'service_name': self.name,
+            plural_entity_str: entity_list
+        }
+        return response
+
 
 if __name__ == '__main__':
     ym = YandexMusic()
-    while True:
-        query = input()
-        name, _ = ym.search_artist_by_link(query)
-        print(ym.search_artist(name))
+    print(ym.search_by_query("lil", MusicService.Entity.Artist, 20))
+    print(ym.search_by_query("love", MusicService.Entity.Album))
+    print(ym.search_by_query("love", MusicService.Entity.Track))

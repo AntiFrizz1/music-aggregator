@@ -115,3 +115,83 @@ class Spotify(MusicService):
             return self.Entity.Artist
         else:
             return None
+
+    @staticmethod
+    def _entity_type_to_string(entity: MusicService.Entity):
+        if entity == MusicService.Entity.Album:
+            return "album"
+        elif entity == MusicService.Entity.Track:
+            return "track"
+        elif entity == MusicService.Entity.Artist:
+            return "artist"
+        else:
+            return None
+
+    @staticmethod
+    def _extract_track_data(track_json):
+        return {
+            'track': track_json['name'],
+            'album': track_json['album']['name'],
+            'artists': [artist['name'] for artist in track_json['artists']],
+            'url': track_json['external_urls']['spotify']
+        }
+
+    @staticmethod
+    def _extract_album_data(album_json):
+        return {
+            'album': album_json['name'],
+            'artists': [artist['name'] for artist in album_json['artists']],
+            'url': album_json['external_urls']['spotify']
+        }
+
+    @staticmethod
+    def _extract_artist_data(artist_json):
+        return {
+            'artist': artist_json['name'],
+            'url': artist_json['external_urls']['spotify']
+        }
+
+    @staticmethod
+    def _extract_search_data(data_json, entity):
+        if entity == MusicService.Entity.Album:
+            return Spotify._extract_album_data(data_json)
+        elif entity == MusicService.Entity.Track:
+            return Spotify._extract_track_data(data_json)
+        elif entity == MusicService.Entity.Artist:
+            return Spotify._extract_artist_data(data_json)
+        else:
+            return None
+
+    def search_by_query(self, query, entity: MusicService.Entity, limit=MusicService.default_limit):
+        entity_str = self._entity_type_to_string(entity)
+        if not entity_str:
+            return None
+        plural_entity_str = entity_str + "s"
+        entity_list = []
+        count = limit
+        offset = 0
+        while count > 0:
+            results = self.client.search(q=query, type=entity_str, market='RU', offset=offset)
+            results = results[plural_entity_str]['items'][:count]
+            for result in results:
+                entity_list.append(self._extract_search_data(result, entity))
+                count -= 1
+                offset += 1
+        response = {
+            'service_name': self.name,
+            plural_entity_str: entity_list
+        }
+        return response
+
+
+if __name__ == '__main__':
+    config_filepath = "../config.yaml"
+    with open(config_filepath, "r") as f:
+        try:
+            config = yaml.safe_load(f)
+            sp = Spotify(config['spotify'])
+            print(sp.search_by_query("lil", MusicService.Entity.Artist, 25))
+            print(sp.search_by_query("love", MusicService.Entity.Track))
+            print(sp.search_by_query("love", MusicService.Entity.Album))
+        except yaml.YAMLError as exc:
+            print(exc)

@@ -13,6 +13,17 @@ class MusicService:
     def _get_entity_id(self, entity_id, entity):
         return "%sq%sq%s" % (self.name, entity.name, entity_id)
 
+    @staticmethod
+    def _entity_to_plural_str(entity):
+        if entity == MusicService.Entity.Track:
+            return "tracks"
+        elif entity == MusicService.Entity.Album:
+            return "albums"
+        elif entity == MusicService.Entity.Artist:
+            return "artists"
+        else:
+            return None
+
     def detect_entity_by_link(self, link):
         raise NotImplemented
 
@@ -22,7 +33,10 @@ class MusicService:
     def search_track(self, track, artists, album=None):
         raise NotImplemented()
 
-    def search_track_by_query(self, query):
+    def search_track_by_query(self, query, limit=default_limit):
+        raise NotImplemented()
+
+    def search_by_query(self, query, entity: Entity, limit=default_limit):
         raise NotImplemented()
 
     def search_artist_by_link(self, link):
