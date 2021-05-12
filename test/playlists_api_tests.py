@@ -53,8 +53,8 @@ class MusicAggregatorApiTestCase(unittest.TestCase):
                      "password": "%s" % test_password,
                      "email": "%s" % test_email}
         response = self.app.post('signup', json=user_data)
-        assert response.status_code == 200
-        assert response.json == user_schema.dump(user_data)
+        assert response.status_code == 201
+        assert response.json == user_response_schema.dump(user_data)
 
     def setUp(self):
         self.app = app.test_client()
