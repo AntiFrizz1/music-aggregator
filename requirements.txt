@@ -16,6 +16,7 @@ MongoAlchemy==0.19
 mongoengine==0.23.0
 mongomock==3.22.1
 psycopg2==2.8.6
+pytest==6.2.4
 PyYAML==5.4.1
 requests==2.25.1
 spotipy==2.17.1
