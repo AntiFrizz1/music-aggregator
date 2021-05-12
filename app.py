@@ -1,11 +1,10 @@
 import functools
-import json
 import os
 import yaml
 
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
-from flask import Flask, url_for, request, abort, make_response, jsonify
+from flask import Flask, url_for, request, abort, make_response
 from flask_apispec import marshal_with, doc, use_kwargs
 from flask_apispec.extension import FlaskApiSpec
 from flask_apispec.views import MethodResource
@@ -18,7 +17,7 @@ from common.apple_music import AppleMusic
 from common.music_service import MusicService
 from common.spotify import Spotify
 from common.ya_music import YandexMusic
-from db.models import User, Playlist, History
+from db.models import User, Playlist
 from db.sql import sql_db, initialize_sql_db
 from db.mongo import initialize_mongo_db
 from schemas.schemas import initialize_marshmallow, playlist_schema, playlists_schema, user_request_schema, \
@@ -194,11 +193,6 @@ class SearchApi(MethodResource):
         # history = History.from_json(json.dumps(history_json))
         # history.save()
         return result, 200
-
-
-@app.route('/', methods=['GET'])
-def check_if_alive():
-    return jsonify({'message': 'Hey, Im alive!'}), 200
 
 
 api.add_resource(SignupApi, '/signup')

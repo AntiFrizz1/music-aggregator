@@ -59,14 +59,14 @@ class MusicAggregatorApiTestCase(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
 
-        self.mongo_db_filename = str(uuid.uuid4())
+        mongo_db_filename = str(uuid.uuid4())
 
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite://"
         app.config['TESTING'] = True
 
         app.sql_db = SQLAlchemy()
         initialize_sql_db(app)
-        mongoengine.connect(self.mongo_db_filename, alias='default')
+        mongoengine.connect(mongo_db_filename, alias='default', host='mongomock://localhost')
 
         with app.app_context():
             sql_db.create_all()
@@ -77,10 +77,6 @@ class MusicAggregatorApiTestCase(unittest.TestCase):
 
     def tearDown(self):
         mongoengine.disconnect(alias='default')
-
-    def test_initialization(self):
-        rv = self.app.get('/')
-        assert rv.data == b'Hey, Im alive!'
 
     # when get playlist then code 200 is returned
     def test_get_empty_playlists(self):
