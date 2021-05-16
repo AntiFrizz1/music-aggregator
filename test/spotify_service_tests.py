@@ -12,6 +12,9 @@ class SpotifyTestClient:
     def search(self):
         pass
 
+    def artist(self):
+        pass
+
 
 class SpotifyServiceTestCase(unittest.TestCase):
 
