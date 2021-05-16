@@ -1,21 +1,26 @@
 import unittest
-import yaml
 
 from unittest.mock import Mock
 from common.spotify import Spotify
 from test.data import test_data
 
 
+class SpotifyTestClient:
+    def track(self):
+        pass
+
+    def search(self):
+        pass
+
+    def artist(self):
+        pass
+
+
 class SpotifyServiceTestCase(unittest.TestCase):
 
     def setUp(self):
-        config_filepath = "../config.yaml"
-        with open(config_filepath, "r") as f:
-            try:
-                config = yaml.safe_load(f)
-                self.service = Spotify(config['spotify'])
-            except yaml.YAMLError as exc:
-                print(exc)
+        self.service = Spotify()
+        self.service.client = SpotifyTestClient()
 
     def test_search_track_by_link(self):
         # given

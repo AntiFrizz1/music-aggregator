@@ -15,7 +15,7 @@ from webargs import fields, validate, flaskparser
 
 from common.apple_music import AppleMusic
 from common.music_service import MusicService
-from common.spotify import Spotify
+from common.spotify import Spotify, validate_spotify_config
 from common.ya_music import YandexMusic
 from db.models import User, Playlist
 from db.sql import sql_db, initialize_sql_db
@@ -206,25 +206,32 @@ docs.register(PlaylistApi)
 docs.register(SearchApi)
 
 
-def init_app():
-    app.app_context().push()
-    initialize_sql_db(app)
-    initialize_mongo_db(app)
-    initialize_marshmallow(app)
-
+def init_services():
     config_filepath = "config.yaml"
     services[YandexMusic.name] = YandexMusic()
     services[AppleMusic.name] = AppleMusic()
     with open(config_filepath, "r") as f:
         try:
             config = yaml.safe_load(f)
-            services[Spotify.name] = Spotify(config['spotify'])
+            spotify_config = config['spotify']
+            result, message = validate_spotify_config(spotify_config)
+            if not result:
+                print(message)
+                return
+            services[Spotify.name] = Spotify(spotify_config['client_id'], spotify_config['client_secret'])
         except yaml.YAMLError as exc:
             print(exc)
+
+
+def init_app():
+    app.app_context().push()
+    initialize_sql_db(app)
+    initialize_mongo_db(app)
+    initialize_marshmallow(app)
+    init_services()
+
     with app.app_context():
         sql_db.create_all()
-
-
 
 
 def run():

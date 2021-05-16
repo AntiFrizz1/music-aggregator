@@ -14,4 +14,4 @@ jobs:
       run: docker build -t docker-ut -f test.dockerfile .
 
     - name: Run Tests
-      run: docker run docker-ut pytest test/playlists_api_tests.py
+      run: docker run docker-ut ./run_tests.sh
