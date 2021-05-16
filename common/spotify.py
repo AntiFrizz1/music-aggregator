@@ -167,16 +167,16 @@ class Spotify(MusicService):
             return None
         plural_entity_str = entity_str + "s"
         entity_list = []
-        count = limit
+        remaining_count = limit
         offset = 0
-        while count > 0:
+        while remaining_count > 0:
             results = self.client.search(q=query, type=entity_str, market='RU', offset=offset)
-            results = results[plural_entity_str]['items'][:count]
+            results = results[plural_entity_str]['items'][:remaining_count]
             if len(results) == 0:
                 break
             for result in results:
                 entity_list.append(self._extract_search_data(result, entity))
-                count -= 1
+                remaining_count -= 1
                 offset += 1
         response = {
             'service_name': self.name,
@@ -216,5 +216,7 @@ if __name__ == '__main__':
             name = "Meteora"
             print(sp.client.search(name, type='album', market='RU'))
             print(sp.search_album(name))
+            print(" ")
+            print(sp.search_by_query("PVRIS", MusicService.Entity.Artist))
         except yaml.YAMLError as exc:
             print(exc)

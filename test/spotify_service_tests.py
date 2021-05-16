@@ -116,3 +116,78 @@ class SpotifyServiceTestCase(unittest.TestCase):
         self.assertEqual(self.service.Entity.Track, self.service.detect_entity_by_link(track_link))
         self.assertEqual(self.service.Entity.Artist, self.service.detect_entity_by_link(artist_link))
 
+    def test_entity_type_to_string(self):
+        self.assertEqual("album", self.service._entity_type_to_string(self.service.Entity.Album))
+        self.assertEqual("track", self.service._entity_type_to_string(self.service.Entity.Track))
+        self.assertEqual("artist", self.service._entity_type_to_string(self.service.Entity.Artist))
+
+    def test_extract_track_data(self):
+        # given
+        track_json = test_data.spotify_test_track_json
+
+        # when
+        actual = self.service._extract_track_data(track_json)
+
+        # then
+        expected = {'track': 'I Hate Everything About You - Live Acoustic - Rolling Stone Original (EP)',
+                    'album': 'Rolling Stone Original (EP)',
+                    'artists': ['Three Days Grace'],
+                    'url': 'https://open.spotify.com/track/7e2073Iang0hKXlFoffwpF'}
+        self.assertEqual(expected, actual)
+
+    def test_extract_album_data(self):
+        # given
+        album_json = test_data.spotify_test_album_json
+
+        # when
+        actual = self.service._extract_album_data(album_json)
+
+        # then
+        expected = {'album': 'Moral Panic',
+                    'artists': ['Nothing But Thieves'],
+                    'url': 'https://open.spotify.com/album/5LNmaMITXXVrEm4fnyUbrd'}
+        self.assertEqual(expected, actual)
+
+    def test_extract_artist_data(self):
+        # given
+        artist_json = test_data.spotify_test_artist_json
+
+        # when
+        actual = self.service._extract_artist_data(artist_json)
+
+        # then
+        expected = {'artist': 'PVRIS',
+                    'url': 'https://open.spotify.com/artist/6oFs3qk4VepIVFdoD4jmsy'}
+        self.assertEqual(expected, actual)
+
+    def test_extract_search_data(self):
+        track_json = test_data.spotify_test_track_json
+        album_json = test_data.spotify_test_album_json
+        artist_json = test_data.spotify_test_artist_json
+
+        expected_track = {'track': 'I Hate Everything About You - Live Acoustic - Rolling Stone Original (EP)',
+                    'album': 'Rolling Stone Original (EP)',
+                    'artists': ['Three Days Grace'],
+                    'url': 'https://open.spotify.com/track/7e2073Iang0hKXlFoffwpF'}
+
+        expected_album = {'album': 'Moral Panic',
+                    'artists': ['Nothing But Thieves'],
+                    'url': 'https://open.spotify.com/album/5LNmaMITXXVrEm4fnyUbrd'}
+
+        expected_artist = {'artist': 'PVRIS',
+                    'url': 'https://open.spotify.com/artist/6oFs3qk4VepIVFdoD4jmsy'}
+
+        self.assertEqual(expected_album, self.service._extract_search_data(album_json, self.service.Entity.Album))
+        self.assertEqual(expected_track, self.service._extract_search_data(track_json, self.service.Entity.Track))
+        self.assertEqual(expected_artist, self.service._extract_search_data(artist_json, self.service.Entity.Artist))
+
+    def test_search_by_query(self):
+        search_artist_query = "PVRIS"
+        total_artists = len(test_data.spotify_search_artists_by_query_json['artists']['items'])
+        print(total_artists)
+        self.service.client.search = Mock(return_value=test_data.spotify_search_artists_by_query_json)
+        for limit in range(1, total_artists):
+            result = self.service.search_by_query(search_artist_query, self.service.Entity.Artist, limit)
+            total_entries = len(result['artists'])
+            print(limit, total_entries)
+            self.assertTrue(total_entries == min(total_artists, limit))

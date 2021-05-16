@@ -31,17 +31,17 @@ class MusicServiceTestCase(unittest.TestCase):
         self.service.detect_entity_by_link = Mock(return_value=self.service.Entity.Album)
         self.service.search_album_by_link = Mock(return_value=["album", "album_id"])
         self.service.search_by_link(album_link)
-        self.service.search_album_by_link.assert_called_with(album_link)
+        self.service.search_album_by_link.assert_called_once_with(album_link)
 
         self.service.detect_entity_by_link = Mock(return_value=self.service.Entity.Track)
         self.service.search_track_by_link = Mock(return_value=["track", "track_id"])
         self.service.search_by_link(track_link)
-        self.service.search_track_by_link.assert_called_with(track_link)
+        self.service.search_track_by_link.assert_called_once_with(track_link)
 
         self.service.detect_entity_by_link = Mock(return_value=self.service.Entity.Artist)
         self.service.search_artist_by_link = Mock(return_value=["artist", "artist_id"])
         self.service.search_by_link(artist_link)
-        self.service.search_artist_by_link.assert_called_with(artist_link)
+        self.service.search_artist_by_link.assert_called_once_with(artist_link)
 
     def test_search_by_entity(self):
         entity_name = "some_entity_name"
@@ -49,12 +49,12 @@ class MusicServiceTestCase(unittest.TestCase):
 
         self.service.search_album = Mock(return_value=result_link)
         self.service.search_by_entity(self.service.Entity.Album, entity_name)
-        self.service.search_album.assert_called_with(*entity_name)
+        self.service.search_album.assert_called_once_with(*entity_name)
 
         self.service.search_artist = Mock(return_value=result_link)
         self.service.search_by_entity(self.service.Entity.Artist, entity_name)
-        self.service.search_artist.assert_called_with(*entity_name)
+        self.service.search_artist.assert_called_once_with(*entity_name)
 
         self.service.search_track = Mock(return_value=result_link)
         self.service.search_by_entity(self.service.Entity.Track, entity_name)
-        self.service.search_track.assert_called_with(*entity_name)
+        self.service.search_track.assert_called_once_with(*entity_name)

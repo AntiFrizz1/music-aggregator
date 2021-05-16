@@ -4040,3 +4040,495 @@ spotify_test_album_meteora = {
       "total":137
    }
 }
+
+spotify_test_track_json = {
+   "album":{
+      "album_type":"single",
+      "artists":[
+         {
+            "external_urls":{
+               "spotify":"https://open.spotify.com/artist/2xiIXseIJcq3nG7C8fHeBj"
+            },
+            "href":"https://api.spotify.com/v1/artists/2xiIXseIJcq3nG7C8fHeBj",
+            "id":"2xiIXseIJcq3nG7C8fHeBj",
+            "name":"Three Days Grace",
+            "type":"artist",
+            "uri":"spotify:artist:2xiIXseIJcq3nG7C8fHeBj"
+         }
+      ],
+      "external_urls":{
+         "spotify":"https://open.spotify.com/album/6S7lvN6dnZ7EU8TPujw7gd"
+      },
+      "href":"https://api.spotify.com/v1/albums/6S7lvN6dnZ7EU8TPujw7gd",
+      "id":"6S7lvN6dnZ7EU8TPujw7gd",
+      "images":[
+         {
+            "height":640,
+            "url":"https://i.scdn.co/image/ab67616d0000b273f84f503fbcacca302785b94a",
+            "width":640
+         },
+         {
+            "height":300,
+            "url":"https://i.scdn.co/image/ab67616d00001e02f84f503fbcacca302785b94a",
+            "width":300
+         },
+         {
+            "height":64,
+            "url":"https://i.scdn.co/image/ab67616d00004851f84f503fbcacca302785b94a",
+            "width":64
+         }
+      ],
+      "name":"Rolling Stone Original (EP)",
+      "release_date":"2003-07-22",
+      "release_date_precision":"day",
+      "total_tracks":4,
+      "type":"album",
+      "uri":"spotify:album:6S7lvN6dnZ7EU8TPujw7gd"
+   },
+   "artists":[
+      {
+         "external_urls":{
+            "spotify":"https://open.spotify.com/artist/2xiIXseIJcq3nG7C8fHeBj"
+         },
+         "href":"https://api.spotify.com/v1/artists/2xiIXseIJcq3nG7C8fHeBj",
+         "id":"2xiIXseIJcq3nG7C8fHeBj",
+         "name":"Three Days Grace",
+         "type":"artist",
+         "uri":"spotify:artist:2xiIXseIJcq3nG7C8fHeBj"
+      }
+   ],
+   "disc_number":1,
+   "duration_ms":239680,
+   "explicit":False,
+   "external_ids":{
+      "isrc":"USJI10401012"
+   },
+   "external_urls":{
+      "spotify":"https://open.spotify.com/track/7e2073Iang0hKXlFoffwpF"
+   },
+   "href":"https://api.spotify.com/v1/tracks/7e2073Iang0hKXlFoffwpF",
+   "id":"7e2073Iang0hKXlFoffwpF",
+   "is_local":False,
+   "is_playable":True,
+   "name":"I Hate Everything About You - Live Acoustic - Rolling Stone Original (EP)",
+   "popularity":19,
+   "preview_url":"https://p.scdn.co/mp3-preview/c598d06980413ca6561d9ebea08bf73e1bb1d710?cid=2f1bc82113914f19a1cc66af6caa2cfc",
+   "track_number":4,
+   "type":"track",
+   "uri":"spotify:track:7e2073Iang0hKXlFoffwpF"
+}
+
+spotify_test_album_json = {
+   "album_type":"album",
+   "artists":[
+      {
+         "external_urls":{
+            "spotify":"https://open.spotify.com/artist/1kDGbuxWknIKx4FlgWxiSp"
+         },
+         "href":"https://api.spotify.com/v1/artists/1kDGbuxWknIKx4FlgWxiSp",
+         "id":"1kDGbuxWknIKx4FlgWxiSp",
+         "name":"Nothing But Thieves",
+         "type":"artist",
+         "uri":"spotify:artist:1kDGbuxWknIKx4FlgWxiSp"
+      }
+   ],
+   "external_urls":{
+      "spotify":"https://open.spotify.com/album/5LNmaMITXXVrEm4fnyUbrd"
+   },
+   "href":"https://api.spotify.com/v1/albums/5LNmaMITXXVrEm4fnyUbrd",
+   "id":"5LNmaMITXXVrEm4fnyUbrd",
+   "images":[
+      {
+         "height":640,
+         "url":"https://i.scdn.co/image/ab67616d0000b2731cf2d58ddfedf57112d7ef76",
+         "width":640
+      },
+      {
+         "height":300,
+         "url":"https://i.scdn.co/image/ab67616d00001e021cf2d58ddfedf57112d7ef76",
+         "width":300
+      },
+      {
+         "height":64,
+         "url":"https://i.scdn.co/image/ab67616d000048511cf2d58ddfedf57112d7ef76",
+         "width":64
+      }
+   ],
+   "name":"Moral Panic",
+   "release_date":"2020-10-23",
+   "release_date_precision":"day",
+   "total_tracks":11,
+   "type":"album",
+   "uri":"spotify:album:5LNmaMITXXVrEm4fnyUbrd"
+}
+
+spotify_test_artist_json = {
+   "external_urls":{
+      "spotify":"https://open.spotify.com/artist/6oFs3qk4VepIVFdoD4jmsy"
+   },
+   "followers":{
+      "href":"None",
+      "total":537818
+   },
+   "genres":[
+      "electropop",
+      "modern alternative rock",
+      "modern rock",
+      "pixie",
+      "pop",
+      "pop emo",
+      "pop punk",
+      "rock"
+   ],
+   "href":"https://api.spotify.com/v1/artists/6oFs3qk4VepIVFdoD4jmsy",
+   "id":"6oFs3qk4VepIVFdoD4jmsy",
+   "images":[
+      {
+         "height":640,
+         "url":"https://i.scdn.co/image/65a9f5630791c716b1b56ac2c69f75cc7843d326",
+         "width":640
+      },
+      {
+         "height":320,
+         "url":"https://i.scdn.co/image/029965032ce2434040f45a2c0dfdb2605dc8c170",
+         "width":320
+      },
+      {
+         "height":160,
+         "url":"https://i.scdn.co/image/4b0d80fd2285da6a98edcf897c38159d05d42025",
+         "width":160
+      }
+   ],
+   "name":"PVRIS",
+   "popularity":67,
+   "type":"artist",
+   "uri":"spotify:artist:6oFs3qk4VepIVFdoD4jmsy"
+}
+
+spotify_search_artists_by_query_json = {
+   "artists":{
+      "href":"https://api.spotify.com/v1/search?query=PVRIS&type=artist&market=RU&offset=0&limit=10",
+      "items":[
+         {
+            "external_urls":{
+               "spotify":"https://open.spotify.com/artist/6oFs3qk4VepIVFdoD4jmsy"
+            },
+            "followers":{
+               "href":"None",
+               "total":537818
+            },
+            "genres":[
+               "electropop",
+               "modern alternative rock",
+               "modern rock",
+               "pixie",
+               "pop",
+               "pop emo",
+               "pop punk",
+               "rock"
+            ],
+            "href":"https://api.spotify.com/v1/artists/6oFs3qk4VepIVFdoD4jmsy",
+            "id":"6oFs3qk4VepIVFdoD4jmsy",
+            "images":[
+               {
+                  "height":640,
+                  "url":"https://i.scdn.co/image/65a9f5630791c716b1b56ac2c69f75cc7843d326",
+                  "width":640
+               },
+               {
+                  "height":320,
+                  "url":"https://i.scdn.co/image/029965032ce2434040f45a2c0dfdb2605dc8c170",
+                  "width":320
+               },
+               {
+                  "height":160,
+                  "url":"https://i.scdn.co/image/4b0d80fd2285da6a98edcf897c38159d05d42025",
+                  "width":160
+               }
+            ],
+            "name":"PVRIS",
+            "popularity":67,
+            "type":"artist",
+            "uri":"spotify:artist:6oFs3qk4VepIVFdoD4jmsy"
+         },
+         {
+            "external_urls":{
+               "spotify":"https://open.spotify.com/artist/4JMdHrUOSZKdgSeqYNWxB2"
+            },
+            "followers":{
+               "href":"None",
+               "total":0
+            },
+            "genres":[
+
+            ],
+            "href":"https://api.spotify.com/v1/artists/4JMdHrUOSZKdgSeqYNWxB2",
+            "id":"4JMdHrUOSZKdgSeqYNWxB2",
+            "images":[
+
+            ],
+            "name":"SANTANA PVRIS",
+            "popularity":1,
+            "type":"artist",
+            "uri":"spotify:artist:4JMdHrUOSZKdgSeqYNWxB2"
+         },
+         {
+            "external_urls":{
+               "spotify":"https://open.spotify.com/artist/1YgZO4nBPIiXXSy1T3E2LN"
+            },
+            "followers":{
+               "href":"None",
+               "total":22
+            },
+            "genres":[
+
+            ],
+            "href":"https://api.spotify.com/v1/artists/1YgZO4nBPIiXXSy1T3E2LN",
+            "id":"1YgZO4nBPIiXXSy1T3E2LN",
+            "images":[
+               {
+                  "height":640,
+                  "url":"https://i.scdn.co/image/ab67616d0000b273b465a10daca8f0486df66e38",
+                  "width":640
+               },
+               {
+                  "height":300,
+                  "url":"https://i.scdn.co/image/ab67616d00001e02b465a10daca8f0486df66e38",
+                  "width":300
+               },
+               {
+                  "height":64,
+                  "url":"https://i.scdn.co/image/ab67616d00004851b465a10daca8f0486df66e38",
+                  "width":64
+               }
+            ],
+            "name":"PVRISWHITE",
+            "popularity":0,
+            "type":"artist",
+            "uri":"spotify:artist:1YgZO4nBPIiXXSy1T3E2LN"
+         },
+         {
+            "external_urls":{
+               "spotify":"https://open.spotify.com/artist/2AlpUaktyXGg9SsMBjdvhD"
+            },
+            "followers":{
+               "href":"None",
+               "total":19
+            },
+            "genres":[
+
+            ],
+            "href":"https://api.spotify.com/v1/artists/2AlpUaktyXGg9SsMBjdvhD",
+            "id":"2AlpUaktyXGg9SsMBjdvhD",
+            "images":[
+               {
+                  "height":640,
+                  "url":"https://i.scdn.co/image/ec41a7ea52ee85966dc3a1f390b1aa63e53ea700",
+                  "width":640
+               },
+               {
+                  "height":320,
+                  "url":"https://i.scdn.co/image/35313acd012c2fa7f02b16f31f8c2163404eb4e4",
+                  "width":320
+               },
+               {
+                  "height":160,
+                  "url":"https://i.scdn.co/image/581bc021245657ed317653f10d476ad5887f28f4",
+                  "width":160
+               }
+            ],
+            "name":"Pvris Chola",
+            "popularity":0,
+            "type":"artist",
+            "uri":"spotify:artist:2AlpUaktyXGg9SsMBjdvhD"
+         },
+         {
+            "external_urls":{
+               "spotify":"https://open.spotify.com/artist/03A55K30Xqdd3SLxWhsviH"
+            },
+            "followers":{
+               "href":"None",
+               "total":3
+            },
+            "genres":[
+
+            ],
+            "href":"https://api.spotify.com/v1/artists/03A55K30Xqdd3SLxWhsviH",
+            "id":"03A55K30Xqdd3SLxWhsviH",
+            "images":[
+               {
+                  "height":640,
+                  "url":"https://i.scdn.co/image/12ef4e7761b38d66dc802fee9b4296fc1625fbe5",
+                  "width":640
+               },
+               {
+                  "height":320,
+                  "url":"https://i.scdn.co/image/f7e10a07199e6314989f123635b4ac96173d61b4",
+                  "width":320
+               },
+               {
+                  "height":160,
+                  "url":"https://i.scdn.co/image/024ad1402ad9f696108f674a6afc4bbd8ee1bfe3",
+                  "width":160
+               }
+            ],
+            "name":"Pvris Nvpøleøn",
+            "popularity":0,
+            "type":"artist",
+            "uri":"spotify:artist:03A55K30Xqdd3SLxWhsviH"
+         },
+         {
+            "external_urls":{
+               "spotify":"https://open.spotify.com/artist/4MEHdn8a7BG71gTakkQ8Ae"
+            },
+            "followers":{
+               "href":"None",
+               "total":15
+            },
+            "genres":[
+
+            ],
+            "href":"https://api.spotify.com/v1/artists/4MEHdn8a7BG71gTakkQ8Ae",
+            "id":"4MEHdn8a7BG71gTakkQ8Ae",
+            "images":[
+               {
+                  "height":640,
+                  "url":"https://i.scdn.co/image/ab67616d0000b27370b13210bd543499a95b6705",
+                  "width":640
+               },
+               {
+                  "height":300,
+                  "url":"https://i.scdn.co/image/ab67616d00001e0270b13210bd543499a95b6705",
+                  "width":300
+               },
+               {
+                  "height":64,
+                  "url":"https://i.scdn.co/image/ab67616d0000485170b13210bd543499a95b6705",
+                  "width":64
+               }
+            ],
+            "name":"Pvris Jay the God",
+            "popularity":0,
+            "type":"artist",
+            "uri":"spotify:artist:4MEHdn8a7BG71gTakkQ8Ae"
+         },
+         {
+            "external_urls":{
+               "spotify":"https://open.spotify.com/artist/0MNoPnrAr9MyWdISX73NhW"
+            },
+            "followers":{
+               "href":"None",
+               "total":2
+            },
+            "genres":[
+
+            ],
+            "href":"https://api.spotify.com/v1/artists/0MNoPnrAr9MyWdISX73NhW",
+            "id":"0MNoPnrAr9MyWdISX73NhW",
+            "images":[
+
+            ],
+            "name":"Pvris Davinci",
+            "popularity":0,
+            "type":"artist",
+            "uri":"spotify:artist:0MNoPnrAr9MyWdISX73NhW"
+         },
+         {
+            "external_urls":{
+               "spotify":"https://open.spotify.com/artist/3jK3PCA75ZQIKlvcFSZ28z"
+            },
+            "followers":{
+               "href":"None",
+               "total":128
+            },
+            "genres":[
+
+            ],
+            "href":"https://api.spotify.com/v1/artists/3jK3PCA75ZQIKlvcFSZ28z",
+            "id":"3jK3PCA75ZQIKlvcFSZ28z",
+            "images":[
+               {
+                  "height":640,
+                  "url":"https://i.scdn.co/image/ab67616d0000b27371f146f380d4d144e883a891",
+                  "width":640
+               },
+               {
+                  "height":300,
+                  "url":"https://i.scdn.co/image/ab67616d00001e0271f146f380d4d144e883a891",
+                  "width":300
+               },
+               {
+                  "height":64,
+                  "url":"https://i.scdn.co/image/ab67616d0000485171f146f380d4d144e883a891",
+                  "width":64
+               }
+            ],
+            "name":"Pvris DaVinci",
+            "popularity":0,
+            "type":"artist",
+            "uri":"spotify:artist:3jK3PCA75ZQIKlvcFSZ28z"
+         },
+         {
+            "external_urls":{
+               "spotify":"https://open.spotify.com/artist/0TcDwPRA4XjjKYX8TxOjPG"
+            },
+            "followers":{
+               "href":"None",
+               "total":0
+            },
+            "genres":[
+
+            ],
+            "href":"https://api.spotify.com/v1/artists/0TcDwPRA4XjjKYX8TxOjPG",
+            "id":"0TcDwPRA4XjjKYX8TxOjPG",
+            "images":[
+
+            ],
+            "name":"Pvris Chola",
+            "popularity":0,
+            "type":"artist",
+            "uri":"spotify:artist:0TcDwPRA4XjjKYX8TxOjPG"
+         },
+         {
+            "external_urls":{
+               "spotify":"https://open.spotify.com/artist/0Ztk7WdD3t7cBKhmQhD1B7"
+            },
+            "followers":{
+               "href":"None",
+               "total":1
+            },
+            "genres":[
+
+            ],
+            "href":"https://api.spotify.com/v1/artists/0Ztk7WdD3t7cBKhmQhD1B7",
+            "id":"0Ztk7WdD3t7cBKhmQhD1B7",
+            "images":[
+               {
+                  "height":640,
+                  "url":"https://i.scdn.co/image/ab67616d0000b27396096e4aba324b9ec850743b",
+                  "width":640
+               },
+               {
+                  "height":300,
+                  "url":"https://i.scdn.co/image/ab67616d00001e0296096e4aba324b9ec850743b",
+                  "width":300
+               },
+               {
+                  "height":64,
+                  "url":"https://i.scdn.co/image/ab67616d0000485196096e4aba324b9ec850743b",
+                  "width":64
+               }
+            ],
+            "name":"Pvris Nvpoleon",
+            "popularity":0,
+            "type":"artist",
+            "uri":"spotify:artist:0Ztk7WdD3t7cBKhmQhD1B7"
+         }
+      ],
+      "limit":10,
+      "next":"None",
+      "offset":0,
+      "previous":"None",
+      "total":10
+   }
+}
