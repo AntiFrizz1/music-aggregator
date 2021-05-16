@@ -1,9 +1,8 @@
-import re
-import yaml
-
 import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
+import yaml
 from spotipy import SpotifyException
+from spotipy.oauth2 import SpotifyClientCredentials
+
 from common.music_service import MusicService
 
 
@@ -193,5 +192,13 @@ if __name__ == '__main__':
             print(sp.search_by_query("lil", MusicService.Entity.Artist, 25))
             print(sp.search_by_query("love", MusicService.Entity.Track))
             print(sp.search_by_query("love", MusicService.Entity.Album))
+            print(sp.client.track("https://open.spotify.com/track/6rUp7v3l8yC4TKxAAR5Bmx", market='RU'))
+            print(sp.search_track_by_link("https://open.spotify.com/track/6rUp7v3l8yC4TKxAAR5Bmx"))
+            test_artists = ['Three Days Grace']
+            test_track = 'I Hate Everything About You'
+            test_query = ', '.join(test_artists) + " - " + test_track
+            print(test_query)
+            print(sp.client.search(q=test_query, type='track', market='RU'))
+            print(sp.search_track(test_track, test_artists))
         except yaml.YAMLError as exc:
             print(exc)

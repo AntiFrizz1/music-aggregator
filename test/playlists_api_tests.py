@@ -8,38 +8,11 @@ import mongoengine
 from flask_sqlalchemy import SQLAlchemy
 
 from app import *
+from test.data import test_data
 
 test_username = 'PeterTheGreat'
 test_password = 'GreatToBe'
 test_email = 'peters@burg.ru'
-
-playlist_data = {
-    "name": "Pop Music 2008",
-    "description": "some popular music",
-    "tracks": [
-        {
-            "service_name": "service1",
-            "album": "Album1",
-            "artists": [
-                "Artist1",
-                "Artist2"
-            ],
-            "track": "Best track 1",
-            "url": "https://open.spotify.com/track/track_id"
-        },
-        {
-            "service_name": "service2",
-            "album": "Album2",
-            "artists": [
-                "Artist1",
-                "Artist2",
-                "Artist3"
-            ],
-            "track": "Best track 2",
-            "url": "https://music.yandex.ru/album/abum_id/track/track_id"
-        }
-    ]
-}
 
 
 def extract_path(url):
@@ -86,7 +59,7 @@ class MusicAggregatorApiTestCase(unittest.TestCase):
 
     def _provision_playlist(self):
         response = self.app.post('playlists/',
-                                 json=playlist_data,
+                                 json=test_data.playlist_data,
                                  headers={"Authorization": "Basic {}".format(self.user_credentials)})
         headers: Headers = response.headers
         location = headers.get('Location')
@@ -97,12 +70,12 @@ class MusicAggregatorApiTestCase(unittest.TestCase):
     def test_post_playlist(self):
         response, _ = self._provision_playlist()
         assert response.status_code == 201
-        assert response.json == playlist_data
+        assert response.json == test_data.playlist_data
 
     # when put playlist then code 200 is returned
     def test_put_playlist(self):
         _, location = self._provision_playlist()
-        edited_playlist = playlist_data.copy()
+        edited_playlist = test_data.playlist_data.copy()
         edited_playlist['name'] = "New playlist name"
         edited_playlist['tracks'].pop(0)
         response = self.app.put(location,
@@ -116,7 +89,7 @@ class MusicAggregatorApiTestCase(unittest.TestCase):
         _, location = self._provision_playlist()
         response = self.app.get(location, headers={"Authorization": "Basic {}".format(self.user_credentials)})
         assert response.status_code == 200
-        assert response.json == playlist_data
+        assert response.json == test_data.playlist_data
 
     # when delete playlist then code 204 is returned
     def test_delete_playlist(self):
@@ -133,8 +106,8 @@ class MusicAggregatorApiTestCase(unittest.TestCase):
         playlists_data = [
             {
                 "_links": { 'self': location },
-                'name': playlist_data['name'],
-                "description": playlist_data['description']
+                'name': test_data.playlist_data['name'],
+                "description": test_data.playlist_data['description']
             } for location in playlists_locations
         ]
         response = self.app.get('playlists/', headers={"Authorization": "Basic {}".format(self.user_credentials)})

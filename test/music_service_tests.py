@@ -16,12 +16,12 @@ class MusicServiceTestCase(unittest.TestCase):
     def verify_entity_id(self, entity_id, entity_type):
         actual_entity_id = self.service._get_entity_id(entity_id, entity_type)
         expected_entity_id = MusicService.name + "q" + entity_type.name + "q" + entity_id
-        self.assertEquals(actual_entity_id, expected_entity_id)
+        self.assertEqual(actual_entity_id, expected_entity_id)
 
     def test_entity_to_plural_str(self):
-        self.assertEquals(self.service._entity_to_plural_str(self.service.Entity.Album), "albums")
-        self.assertEquals(self.service._entity_to_plural_str(self.service.Entity.Track), "tracks")
-        self.assertEquals(self.service._entity_to_plural_str(self.service.Entity.Artist), "artists")
+        self.assertEqual(self.service._entity_to_plural_str(self.service.Entity.Album), "albums")
+        self.assertEqual(self.service._entity_to_plural_str(self.service.Entity.Track), "tracks")
+        self.assertEqual(self.service._entity_to_plural_str(self.service.Entity.Artist), "artists")
 
     def test_search_by_link(self):
         album_link = "https://open.spotify.com/album/13topfW33NjnACjnRiZBX7"
