@@ -203,5 +203,18 @@ if __name__ == '__main__':
             print(test_query)
             print(sp.client.search(q=test_query, type='track', market='RU'))
             print(sp.search_track(test_track, test_artists))
+            print(sp.search_track_by_query(test_query, 2))
+            link = "https://open.spotify.com/artist/2xiIXseIJcq3nG7C8fHeBj"
+            print(sp.client.artist(link))
+            print(sp.search_artist_by_link(link))
+            link = "https://open.spotify.com/album/13topfW33NjnACjnRiZBX7"
+            print(sp.client.album(link))
+            print(sp.search_album_by_link(link))
+            name = "Linkin Park"
+            print(sp.client.search(name, type='artist', market='RU'))
+            print(sp.search_artist(name))
+            name = "Meteora"
+            print(sp.client.search(name, type='album', market='RU'))
+            print(sp.search_album(name))
         except yaml.YAMLError as exc:
             print(exc)
