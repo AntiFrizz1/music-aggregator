@@ -26,15 +26,15 @@ def validate_spotify_config(config):
 class Spotify(MusicService):
     name = 'Spotify'
 
-    def __init__(self, config):
+    def __init__(self, client_id, client_secret):
         super(Spotify, self).__init__()
 
         self.client = None
-        result, message = validate_spotify_config(config)
-        if not result:
-            raise ValueError(message)
-        self.client = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=config['client_id'],
-                                                                            client_secret=config['client_secret']))
+        auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+        self.client = spotipy.Spotify(auth_manager=auth_manager)
+
+    def __init__(self):
+        self.client = None
 
     def search_track_by_link(self, link):
         try:
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     with open(config_filepath, "r") as f:
         try:
             config = yaml.safe_load(f)
-            sp = Spotify(config['spotify'])
+            sp = Spotify(config['spotify']['client_id'], config['spotify']['client_secret'])
             print(sp.search_by_query("three days grace", MusicService.Entity.Artist, 25))
             print(sp.search_by_query("love", MusicService.Entity.Track))
             print(sp.search_by_query("lov1e", MusicService.Entity.Album))
