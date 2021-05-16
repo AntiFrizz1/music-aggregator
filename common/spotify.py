@@ -173,6 +173,8 @@ class Spotify(MusicService):
         while count > 0:
             results = self.client.search(q=query, type=entity_str, market='RU', offset=offset)
             results = results[plural_entity_str]['items'][:count]
+            if len(results) == 0:
+                break
             for result in results:
                 entity_list.append(self._extract_search_data(result, entity))
                 count -= 1
@@ -190,8 +192,8 @@ if __name__ == '__main__':
         try:
             config = yaml.safe_load(f)
             sp = Spotify(config['spotify'])
-            print(sp.search_by_query("lil", MusicService.Entity.Artist, 25))
+            print(sp.search_by_query("three days grace", MusicService.Entity.Artist, 25))
             print(sp.search_by_query("love", MusicService.Entity.Track))
-            print(sp.search_by_query("love", MusicService.Entity.Album))
+            print(sp.search_by_query("lov1e", MusicService.Entity.Album))
         except yaml.YAMLError as exc:
             print(exc)

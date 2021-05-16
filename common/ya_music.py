@@ -202,6 +202,8 @@ class YandexMusic(MusicService):
         while count > 0:
             results = self.client.search(text=query, type_=entity_str, page=page)
             results = results[plural_entity_str].results[:count]
+            if len(results) == 0:
+                break
             for result in results:
                 entity_list.append(self._extract_search_data(result, entity))
                 count -= 1
@@ -215,6 +217,6 @@ class YandexMusic(MusicService):
 
 if __name__ == '__main__':
     ym = YandexMusic()
-    print(ym.search_by_query("lil", MusicService.Entity.Artist, 20))
+    print(ym.search_by_query("lil peep", MusicService.Entity.Artist, 50))
     print(ym.search_by_query("love", MusicService.Entity.Album))
     print(ym.search_by_query("love", MusicService.Entity.Track))
