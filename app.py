@@ -144,7 +144,7 @@ class PlaylistApi(MethodResource):
 
 search_args = {
     "q": fields.Str(required=True, validate=validate.Length(min=3)),
-    "limit": fields.Int(validate=lambda val: val > 0, default=5),
+    "limit": fields.Int(validate=lambda val: val > 0, missing=5),
     "services": fields.List(
         fields.Str(validate=validate.OneOf(['AppleMusic', 'Spotify', 'YandexMusic'])),
         validate=validate.Length(min=1)
@@ -161,7 +161,7 @@ class SearchApi(MethodResource):
     def get(self, **kwargs):
         query = kwargs['q']
         service_names = kwargs.get('services')
-        limit = kwargs.get('limit')
+        limit = kwargs['limit']
         entity_name = kwargs['entity']
 
         search_in_services = {}
