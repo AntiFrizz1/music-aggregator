@@ -8,7 +8,7 @@ from db.models import Playlist, User
 ma = Marshmallow()
 
 
-class UserSchema(Schema):
+class UserRequestSchema(Schema):
     username = fields.String(required=True)
     password = fields.String(required=True, load_only=True)
     email = fields.String(required=True)
@@ -23,6 +23,11 @@ class UserSchema(Schema):
         return user
 
 
+class UserResponseSchema(Schema):
+    username = fields.String(required=True)
+    email = fields.String(required=True)
+
+
 class TrackSchema(Schema):
     album = fields.String(required=False)
     artists = fields.List(fields.String, required=True)
@@ -30,9 +35,22 @@ class TrackSchema(Schema):
     url = fields.String(required=True)
 
 
-class QueryResultSchema(Schema):
+class AlbumSchema(Schema):
+    album = fields.String(required=False)
+    artists = fields.List(fields.String, required=True)
+    url = fields.String(required=True)
+
+
+class ArtistSchema(Schema):
+    artist = fields.String(required=True)
+    url = fields.String(required=True)
+
+
+class SearchResultSchema(Schema):
     service_name = fields.String(required=True)
-    tracks = fields.List(fields.Nested(TrackSchema), required=True)
+    tracks = fields.List(fields.Nested(TrackSchema))
+    albums = fields.List(fields.Nested(AlbumSchema))
+    artists = fields.List(fields.Nested(ArtistSchema))
 
 
 class HistorySchema(Schema):
@@ -40,7 +58,7 @@ class HistorySchema(Schema):
     services = fields.String()
     limit = fields.Int()
     user_id = fields.Int(required=True, load_only=True)
-    result = fields.List(fields.Nested(QueryResultSchema), required=True)
+    result = fields.List(fields.Nested(SearchResultSchema), required=True)
     requested_at = fields.DateTime(required=True)
 
 
@@ -49,23 +67,14 @@ class PlaylistTrackSchema(TrackSchema):
 
 
 class PlaylistSchema(Schema):
-    user_id = fields.Int(required=True, load_only=True)
     name = fields.String(required=True)
     description = fields.String(required=True)
     tracks = fields.List(fields.Nested(PlaylistTrackSchema), required=True)
 
     @post_load
     def create_playlist(self, data, **kwargs):
-        return Playlist(**data)
-
-    @pre_load
-    def add_user_id(self, data, **kwargs):
         data['user_id'] = g.user.user_id
-        return data
-
-
-class Link(Schema):
-    self = fields.String(required=True)
+        return Playlist(**data)
 
 
 class PlaylistsSchema(Schema):
@@ -74,14 +83,17 @@ class PlaylistsSchema(Schema):
 
     _links = Hyperlinks(
         {
-            "self": URLFor("get_playlist", values=dict(playlist_id="<id>")),
-        }
+            "self": URLFor("playlistapi", values=dict(playlist_id="<id>"), _external=True, required=True),
+        },
+        required=True
     )
 
 
 playlist_schema = PlaylistSchema()
 playlists_schema = PlaylistsSchema(many=True)
-user_schema = UserSchema()
+user_request_schema = UserRequestSchema()
+user_response_schema = UserResponseSchema()
+search_results_schema = SearchResultSchema(many=True)
 
 
 def initialize_marshmallow(app):

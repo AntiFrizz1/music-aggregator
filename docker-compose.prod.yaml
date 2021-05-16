@@ -1,0 +1,91 @@
+version: '3.7'
+
+services:
+  flask:
+    container_name: flask
+    build:
+      context: .
+      dockerfile: app.dockerfile
+    command: gunicorn --workers=4 --bind 0.0.0.0:5000 'app:run()'
+    restart: unless-stopped
+    volumes:
+      - .:/usr/src/app/
+    environment:
+      - FLASK_APP=project/app.py
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://flask_user:flask_password@postgres:5432/flask_prod
+      - MONGODB_DATABASE=flaskdb_prod
+      - MONGODB_USERNAME=flaskuser
+      - MONGODB_PASSWORD=flaskuserpassword
+      - MONGODB_HOSTNAME=mongodb
+    depends_on:
+      - postgres
+      - mongodb
+    networks:
+      - frontend
+      - backend
+
+  postgres:
+    container_name: postgres
+    image: postgres:12-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/data/postgresql/
+    environment:
+      - POSTGRES_USER=flask_user
+      - POSTGRES_PASSWORD=flask_password
+      - POSTGRES_DB=flask_prod
+    networks:
+      - backend
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=rootpassword
+      - MONGO_INITDB_DATABASE=flaskdb_prod
+      - MONGODB_DATA_DIR=/data/db
+      - MONDODB_LOG_DIR=/dev/null
+    volumes:
+      - mongodbdata:/data/db
+      - ./mongo/mongo-init.prod.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - backend
+
+  webserver:
+    build:
+      context: nginx
+      dockerfile: Dockerfile
+    image: digitalocean.com/webserver:latest
+    container_name: webserver
+    restart: unless-stopped
+    environment:
+      APP_ENV: "prod"
+      APP_NAME: "webserver"
+      APP_DEBUG: "false"
+      SERVICE_NAME: "webserver"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - nginxdata:/var/log/nginx
+    depends_on:
+      - flask
+    networks:
+      - frontend
+
+volumes:
+  postgres_data:
+    driver: local
+  mongodbdata:
+    driver: local
+  nginxdata:
+    driver: local
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge

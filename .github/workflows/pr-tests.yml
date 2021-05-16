@@ -1,0 +1,17 @@
+name: Pull request tests
+
+on:
+  pull_request:
+
+jobs:
+  ut:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build Docker image
+      run: docker build -t docker-ut -f test.dockerfile .
+
+    - name: Run Tests
+      run: docker run docker-ut ./run_tests.sh
