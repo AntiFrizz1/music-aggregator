@@ -6,20 +6,18 @@ from test.data import test_data
 
 
 class SpotifyTestClient:
-    def track(self):
-        pass
+    pass
 
-    def search(self):
-        pass
 
-    def artist(self):
-        pass
+class SpotifyTest(Spotify):
+    def __init__(self):
+        self.client = None
 
 
 class SpotifyServiceTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.service = Spotify()
+        self.service = SpotifyTest()
         self.service.client = SpotifyTestClient()
 
     def test_search_track_by_link(self):

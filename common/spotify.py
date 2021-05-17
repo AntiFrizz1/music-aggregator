@@ -33,9 +33,6 @@ class Spotify(MusicService):
         auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
         self.client = spotipy.Spotify(auth_manager=auth_manager)
 
-    def __init__(self):
-        self.client = None
-
     def search_track_by_link(self, link):
         try:
             track_info = self.client.track(link, market='RU')
