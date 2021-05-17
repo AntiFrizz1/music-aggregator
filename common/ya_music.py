@@ -201,6 +201,8 @@ class YandexMusic(MusicService):
         page = 0
         while count > 0:
             results = self.client.search(text=query, type_=entity_str, page=page)
+            if results[plural_entity_str].results is None:
+                return None
             results = results[plural_entity_str].results[:count]
             if len(results) == 0:
                 break
