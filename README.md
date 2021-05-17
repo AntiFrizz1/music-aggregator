@@ -28,6 +28,6 @@ python -m flask run -h 0.0.0.0 -p 5000
 
 ## Deployment
 
-Latest version deployed at http://104.248.206.229/
+Latest version deployed at http://185.255.133.165/
 
-Swagger UI: http://104.248.206.229/swagger-ui
+Swagger UI: http://185.255.133.165/swagger-ui
