@@ -1,6 +1,7 @@
 from flask_marshmallow import Marshmallow
 from flask_marshmallow.fields import Hyperlinks, URLFor
 from marshmallow import Schema, fields, post_load, pre_load
+from marshmallow import validate
 from flask_httpauth import g
 
 from db.models import Playlist, User
@@ -87,6 +88,18 @@ class PlaylistsSchema(Schema):
         },
         required=True
     )
+
+
+class AsyncSearchResultId(Schema):
+    result_id = fields.String(required=True)
+
+
+class AsyncSearchResult(Schema):
+    result = fields.Nested(SearchResultSchema(many=True))
+    status = fields.String(required=True,
+                           validate=validate.OneOf(
+                               ['PENDING', 'STARTED', 'RETRY', 'FAILURE', 'SUCCESS']
+                           ))
 
 
 playlist_schema = PlaylistSchema()

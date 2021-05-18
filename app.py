@@ -21,8 +21,8 @@ from db.models import User, Playlist
 from db.sql import sql_db, initialize_sql_db
 from db.mongo import initialize_mongo_db
 from schemas.schemas import initialize_marshmallow, playlist_schema, playlists_schema, user_request_schema, \
-    user_response_schema, search_results_schema
-
+    user_response_schema, search_results_schema, AsyncSearchResultId, AsyncSearchResult
+from make_celery import make_celery
 
 auth = HTTPBasicAuth()
 app = Flask(__name__)
@@ -34,6 +34,10 @@ app.config['MONGODB_SETTINGS'] = {
 }
 services = {}
 api = Api(app)
+app.config['CELERY_BROKER_URL'] = os.getenv("REDIS_URL", 'redis://localhost:6379')
+app.config['CELERY_RESULT_BACKEND'] = os.getenv("REDIS_URL", 'redis://localhost:6379')
+app.config['CELERY_RESULT_EXPIRES'] = 300
+app.config['CELERY_TRACK_STARTED'] = True
 app.config.update({
     'APISPEC_SPEC': APISpec(
         title='Music Aggregator',
@@ -44,7 +48,9 @@ app.config.update({
     'APISPEC_SWAGGER_URL': '/swagger/',  # URI to access API Doc JSON
     'APISPEC_SWAGGER_UI_URL': '/swagger-ui/'  # URI to access UI of API Doc
 })
+
 docs = FlaskApiSpec(app)
+celery = make_celery(app)
 
 
 @flaskparser.parser.error_handler
@@ -153,8 +159,29 @@ search_args = {
 }
 
 
+def search_func(query, service_names, limit, entity_name, app_services):
+    search_in_services = {}
+    if not service_names:
+        search_in_services = app_services
+    else:
+        for service_name in service_names:
+            search_in_services[service_name] = app_services[service_name]
+
+    if entity_name == 'track':
+        entity = MusicService.Entity.Track
+    elif entity_name == 'artist':
+        entity = MusicService.Entity.Artist
+    else:
+        entity = MusicService.Entity.Album
+
+    result = []
+    for service in search_in_services.values():
+        result.append(service.search_by_query(query, entity, limit))
+    return result
+
+
 class SearchApi(MethodResource):
-    @doc(description="Search track by given query", tags=['Search'])
+    @doc(description="Search track, album and artist by given query", tags=['Search'])
     @auth.login_required
     @use_kwargs(search_args, location="query")
     @marshal_with(search_results_schema, 200)
@@ -164,23 +191,7 @@ class SearchApi(MethodResource):
         limit = kwargs['limit']
         entity_name = kwargs['entity']
 
-        search_in_services = {}
-        if not service_names:
-            search_in_services = services
-        else:
-            for service_name in service_names:
-                search_in_services[service_name] = services[service_name]
-
-        if entity_name == 'track':
-            entity = MusicService.Entity.Track
-        elif entity_name == 'artist':
-            entity = MusicService.Entity.Artist
-        else:
-            entity = MusicService.Entity.Album
-
-        result = []
-        for service in search_in_services.values():
-            result.append(service.search_by_query(query, entity, limit))
+        result = search_func(query, service_names, limit, entity_name, services)
         # history_json = {
         #     'query': query,
         #     'result': result
@@ -195,15 +206,56 @@ class SearchApi(MethodResource):
         return result, 200
 
 
+@celery.task
+def background_search(query, service_names, limit, entity_name, user_id):
+    global services
+    result = search_func(query, service_names, limit, entity_name, services)
+    return {'result': result, '_user_id': user_id}
+
+
+class AsyncSearchApi(MethodResource):
+    @doc(description="Async search track, album and artist by given query", tags=['Search'])
+    @auth.login_required
+    @use_kwargs(search_args, location="query")
+    @marshal_with(AsyncSearchResultId, 200)
+    def get(self, **kwargs):
+        query = kwargs['q']
+        service_names = kwargs.get('services')
+        limit = kwargs['limit']
+        entity_name = kwargs['entity']
+        async_result = background_search.apply_async(args=[query, service_names, limit, entity_name, g.user.user_id])
+        return {'result_id': async_result.id}, 200
+
+
+class AsyncSearchResultApi(MethodResource):
+    @doc(description="Retrieve result of async search", tags=['Search'])
+    @auth.login_required
+    @marshal_with(AsyncSearchResult, 200)
+    def get(self, result_id):
+        async_result = celery.AsyncResult(result_id)
+        status: str = async_result.status
+        if async_result.ready() and status == 'SUCCESS':
+            result = async_result.get()
+            if result['_user_id'] == g.user.user_id:
+                return {'status': status, 'result': result['result']}, 200
+            else:
+                abort(401)
+        return {'status': status}
+
+
 api.add_resource(SignupApi, '/signup')
 api.add_resource(PlaylistsApi, '/playlists/')
 api.add_resource(PlaylistApi, '/playlists/<playlist_id>')
 api.add_resource(SearchApi, '/search')
+api.add_resource(AsyncSearchApi, '/async-search')
+api.add_resource(AsyncSearchResultApi, '/async-search-result/<result_id>')
 
 docs.register(SignupApi)
 docs.register(PlaylistsApi)
 docs.register(PlaylistApi)
 docs.register(SearchApi)
+docs.register(AsyncSearchApi)
+docs.register(AsyncSearchResultApi)
 
 
 def init_services():
@@ -223,12 +275,14 @@ def init_services():
             print(exc)
 
 
+init_services()
+
+
 def init_app():
     app.app_context().push()
     initialize_sql_db(app)
     initialize_mongo_db(app)
     initialize_marshmallow(app)
-    init_services()
 
     with app.app_context():
         sql_db.create_all()
@@ -237,7 +291,6 @@ def init_app():
 def run():
     init_app()
     return app
-
 
 if __name__ == '__main__':
     init_app()
