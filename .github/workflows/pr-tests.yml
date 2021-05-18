@@ -10,6 +10,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Add config.yaml
+      env:
+        SERVICES_CONFIG: ${{ secrets.SERVICES_CONFIG }}
+      run: echo "$SERVICES_CONFIG" > config.yaml
+
     - name: Build Docker image
       run: docker build -t docker-ut -f test.dockerfile .
 
